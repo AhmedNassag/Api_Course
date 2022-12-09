@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Models\Api\Post;
+use App\Console\Commands\expiration;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +15,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        expiration::class,
     ];
 
     /**
@@ -24,8 +26,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // $schedule->command('post:expire')->everyMinute();
+        $schedule->call(function () {
+            $posts = Post::withTrashed()
+            ->where('deleted_at', '<=', now()->subDays(30)->toDateTimeString())
+            ->get();
+
+            $posts->each->forceDelete();
+        })->everyMinute();
     }
 
     /**

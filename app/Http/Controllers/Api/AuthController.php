@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         if (! $token = auth()->attempt($validator->validated()))
         {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Email Or Password Can Be Wrong'], 401);
         }
 
         return $this->createNewToken($token);
@@ -51,9 +51,11 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(),
         [
-            'name'     => 'required|string|between:2,100',
-            'email'    => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:6',
+            'name'         => 'required|string|between:2,100',
+            'email'        => 'required|string|email|max:100|unique:users',
+            'password'     => 'required|string|min:6',
+            'phone_number' => 'required|min:11|unique:users',
+
         ]);
 
         if($validator->fails())

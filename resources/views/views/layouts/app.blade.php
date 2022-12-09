@@ -10,7 +10,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -18,6 +18,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @yield('stylesheets')
 </head>
 <body>
     <div id="app">
@@ -51,7 +52,7 @@
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }}
+                                    {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
@@ -61,7 +62,7 @@
                                         {{ __('Logout') }}
                                     </a>
 
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
                                 </div>
@@ -72,9 +73,51 @@
             </div>
         </nav>
 
-        <main class="py-4">
-            @yield('content')
-        </main>
+        @auth
+            <div class="container">
+                @if (session()->has('success'))
+                    <div class="alert alert-success">
+                        {{ session()->get('success') }}
+                    </div>
+                @endif
+                <div class="row">
+                    <div class="col-md-4 py-4">
+                        <ul class="list-group">
+                            @if (auth()->user()->isAdmin())
+                              <li class="list-group-item">
+                                <a href="{{ route('users.index') }}">Users</a>
+                              </li>
+                            @endif
+                            <li class="list-group-item">
+                            <a href="{{route('posts.index')}}">Posts</a>
+                            </li>
+                            <li class="list-group-item">
+                            <a href="{{ route('categories.index') }}">Categories</a>
+                            </li>
+                            <li class="list-group-item">
+                            <a href="{{ route('tags.index') }}">Tags</a>
+                            </li>
+                            <li class="list-group-item">
+                            <a href="{{ route('trashed.index') }}">Trashed Posts</a>
+                            </li>
+                            <li class="list-group-item">
+                            <a href="{{ route('users.edit', Auth()->user()->id) }}">Profile</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-8">
+                        <main class="py-4">
+                            @yield('content')
+                        </main>
+                    </div>
+                </div>
+            </div>
+        @else
+            <main class="py-4">
+                @yield('content')
+            </main>
+        @endauth
     </div>
+    @yield('scripts')
 </body>
 </html>
